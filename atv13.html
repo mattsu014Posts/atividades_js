@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Caixa Eletrônico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .atm-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 400px;
+            text-align: center;
+        }
+        h1 {
+            color: #0066cc;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0055aa;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .saldo-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e2e3e5;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="atm-container">
+        <h1>Simulador de Caixa Eletrônico</h1>
+        
+        <div class="saldo-info">
+            Saldo disponível: <span id="saldo-display">R$ 1.000,00</span>
+        </div>
+        
+        <div class="form-group">
+            <label for="operacao">Selecione a operação:</label>
+            <select id="operacao">
+                <option value="">-- Selecione --</option>
+                <option value="saldo">Consultar Saldo</option>
+                <option value="saque">Sacar</option>
+                <option value="deposito">Depositar</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="valor-group" style="display: none;">
+            <label for="valor">Valor (R$):</label>
+            <input type="number" id="valor" min="0" step="0.01" placeholder="Digite o valor">
+        </div>
+        
+        <button id="realizar-btn" disabled>Realizar</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let saldo = 1000;
+        const operacaoSelect = document.getElementById('operacao');
+        const valorGroup = document.getElementById('valor-group');
+        const valorInput = document.getElementById('valor');
+        const realizarBtn = document.getElementById('realizar-btn');
+        const resultDiv = document.getElementById('result');
+        const saldoDisplay = document.getElementById('saldo-display');
+
+        operacaoSelect.addEventListener('change', () => {
+            const operacao = operacaoSelect.value;
+            
+            if (operacao === 'saldo') {
+                valorGroup.style.display = 'none';
+                realizarBtn.disabled = false;
+            } else if (operacao === 'saque' || operacao === 'deposito') {
+                valorGroup.style.display = 'block';
+                realizarBtn.disabled = true;
+            } else {
+                valorGroup.style.display = 'none';
+                realizarBtn.disabled = true;
+            }
+            
+            resultDiv.style.display = 'none';
+        });
+
+        valorInput.addEventListener('input', () => {
+            realizarBtn.disabled = valorInput.value === '' || parseFloat(valorInput.value) <= 0;
+        });
+
+        realizarBtn.addEventListener('click', () => {
+            const operacao = operacaoSelect.value;
+            
+            try {
+                if (operacao === 'saldo') {
+                    consultarSaldo();
+                } else if (operacao === 'saque') {
+                    const valor = parseFloat(valorInput.value);
+                    sacar(valor);
+                } else if (operacao === 'deposito') {
+                    const valor = parseFloat(valorInput.value);
+                    depositar(valor);
+                }
+            } catch (error) {
+                showResult(error.message, 'error');
+            }
+        });
+
+        function consultarSaldo() {
+            showResult(`Seu saldo atual é: R$ ${formatarMoeda(saldo)}`, 'info');
+        }
+
+        function sacar(valor) {
+            if (isNaN(valor) || valor <= 0) {
+                throw new Error('Valor inválido para saque');
+            }
+            
+            if (valor > saldo) {
+                throw new Error('Saldo insuficiente para realizar o saque');
+            }
+            
+            saldo -= valor;
+            atualizarSaldo();
+            showResult(`Saque de R$ ${formatarMoeda(valor)} realizado com sucesso! Novo saldo: R$ ${formatarMoeda(saldo)}`, 'success');
+            valorInput.value = '';
+        }
+
+        function depositar(valor) {
+            if (isNaN(valor) || valor <= 0) {
+                throw new Error('Valor inválido para depósito');
+            }
+            
+            saldo += valor;
+            atualizarSaldo();
+            showResult(`Depósito de R$ ${formatarMoeda(valor)} realizado com sucesso! Novo saldo: R$ ${formatarMoeda(saldo)}`, 'success');
+            valorInput.value = '';
+        }
+
+        function showResult(message, type) {
+            resultDiv.textContent = message;
+            resultDiv.className = type;
+            resultDiv.style.display = 'block';
+        }
+
+        function formatarMoeda(valor) {
+            return valor.toFixed(2).replace('.', ',');
+        }
+
+        function atualizarSaldo() {
+            saldoDisplay.textContent = `R$ ${formatarMoeda(saldo)}`;
+        }
+    </script>
+</body>
+</html>
