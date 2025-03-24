@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App de Anotações</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --danger-color: #ef233c;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .input-group {
+            display: flex;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+        
+        #noteInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        #noteInput:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+        
+        #addNoteBtn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        #addNoteBtn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .notes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .note {
+            background-color: white;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .note-text {
+            flex: 1;
+            word-break: break-word;
+            padding-right: 15px;
+        }
+        
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: opacity 0.3s;
+        }
+        
+        .delete-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px 20px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            #addNoteBtn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Minhas Anotações</h1>
+        
+        <div class="input-group">
+            <input type="text" id="noteInput" placeholder="Digite sua anotação aqui...">
+            <button id="addNoteBtn">Adicionar Nota</button>
+        </div>
+        
+        <div class="notes-container" id="notesContainer">
+            <div class="empty-state" id="emptyState">
+                Nenhuma anotação ainda. Adicione sua primeira anotação!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const noteInput = document.getElementById('noteInput');
+            const addNoteBtn = document.getElementById('addNoteBtn');
+            const notesContainer = document.getElementById('notesContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            const addNote = () => {
+                const noteText = noteInput.value.trim();
+                
+                if (noteText === '') {
+                    alert('Por favor, digite uma anotação válida');
+                    return;
+                }
+                
+                if (emptyState.style.display !== 'none') {
+                    emptyState.style.display = 'none';
+                }
+                
+                const noteElement = document.createElement('div');
+                noteElement.className = 'note';
+                
+                noteElement.innerHTML = `
+                    <div class="note-text">${noteText}</div>
+                    <button class="delete-btn">Excluir</button>
+                `;
+                
+                noteElement.querySelector('.delete-btn').addEventListener('click', () => {
+                    noteElement.remove();
+                    checkEmptyState();
+                });
+                
+                notesContainer.appendChild(noteElement);
+                noteInput.value = '';
+                noteInput.focus();
+            };
+            
+            const checkEmptyState = () => {
+                if (notesContainer.children.length === 1) {
+                    emptyState.style.display = 'block';
+                }
+            };
+            
+            addNoteBtn.addEventListener('click', addNote);
+            
+            noteInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addNote();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
