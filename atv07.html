@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Gorjetas</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .calculator {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .service-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .service-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .good {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .regular {
+            background-color: #f39c12;
+            color: white;
+        }
+        .bad {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .service-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .service-btn.active {
+            transform: scale(0.98);
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        .result {
+            background-color: #f1f8fe;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        .result h3 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        .result p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        .highlight {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Calculadora de Gorjetas</h1>
+        
+        <div class="input-group">
+            <label for="billAmount">Valor da Conta (R$)</label>
+            <input type="number" id="billAmount" min="0" step="0.01" placeholder="Ex: 125.50">
+        </div>
+        
+        <label>Qualidade do Serviço</label>
+        <div class="service-buttons">
+            <button class="service-btn good" onclick="selectService('good', this)">Bom (15%)</button>
+            <button class="service-btn regular" onclick="selectService('regular', this)">Regular (10%)</button>
+            <button class="service-btn bad" onclick="selectService('bad', this)">Ruim (5%)</button>
+        </div>
+        
+        <button class="service-btn" style="background-color: #3498db; color: white; width: 100%;" onclick="calculateTip()">Calcular Gorjeta</button>
+        
+        <div class="result" id="result">
+            <h3>Resultado</h3>
+            <p>Valor da Conta: <span class="highlight" id="billValue">R$ 0.00</span></p>
+            <p>Qualidade do Serviço: <span class="highlight" id="serviceQuality">-</span></p>
+            <p>Gorjeta: <span class="highlight" id="tipAmount">R$ 0.00</span></p>
+            <p>Valor Total: <span class="highlight" id="totalAmount">R$ 0.00</span></p>
+        </div>
+    </div>
+
+    <script>
+        let selectedService = null;
+        let selectedButton = null;
+        
+        const selectService = (quality, button) => {
+            if (selectedButton) {
+                selectedButton.classList.remove('active');
+            }
+            
+            selectedService = quality;
+            selectedButton = button;
+            
+            button.classList.add('active');
+        };
+        
+        const calculateTip = () => {
+            const billAmount = parseFloat(document.getElementById('billAmount').value);
+            const resultDiv = document.getElementById('result');
+            
+            if (isNaN(billAmount) {
+                alert('Digite um valor válido para a conta');
+                return;
+            }
+            
+            if (!selectedService) {
+                alert('Selecione a qualidade do serviço');
+                return;
+            }
+            
+            const tipRates = {
+                'good': 0.15,
+                'regular': 0.10,
+                'bad': 0.05
+            };
+            
+            const serviceNames = {
+                'good': 'Bom (15%)',
+                'regular': 'Regular (10%)',
+                'bad': 'Ruim (5%)'
+            };
+            
+            const tipRate = tipRates[selectedService];
+            const tipAmount = billAmount * tipRate;
+            const totalAmount = billAmount + tipAmount;
+            
+            document.getElementById('billValue').textContent = `R$ ${billAmount.toFixed(2)}`;
+            document.getElementById('serviceQuality').textContent = serviceNames[selectedService];
+            document.getElementById('tipAmount').textContent = `R$ ${tipAmount.toFixed(2)}`;
+            document.getElementById('totalAmount').textContent = `R$ ${totalAmount.toFixed(2)}`;
+            
+            resultDiv.style.display = 'block';
+        };
+    </script>
+</body>
+</html>
