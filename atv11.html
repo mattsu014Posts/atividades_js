@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interativo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .question {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .option-btn {
+            padding: 12px 15px;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: left;
+            transition: background-color 0.3s;
+        }
+        .option-btn:hover {
+            background-color: #d0d0d0;
+        }
+        .feedback {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        .reload-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+            display: none;
+        }
+        .reload-btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Quiz Interativo</h1>
+        <div class="question" id="question"></div>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+        <button class="reload-btn" id="reloadBtn">Próxima Pergunta</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Qual é a capital do Brasil?",
+                options: ["Rio de Janeiro", "Brasília", "São Paulo", "Salvador"],
+                correctAnswer: 1
+            },
+            {
+                question: "Quantos planetas existem no nosso sistema solar?",
+                options: ["7", "8", "9", "10"],
+                correctAnswer: 1
+            },
+            {
+                question: "Quem pintou a Mona Lisa?",
+                options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"],
+                correctAnswer: 2
+            },
+            {
+                question: "Qual é o maior oceano da Terra?",
+                options: ["Oceano Atlântico", "Oceano Índico", "Oceano Ártico", "Oceano Pacífico"],
+                correctAnswer: 3
+            }
+        ];
+
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const feedbackElement = document.getElementById('feedback');
+        const reloadBtn = document.getElementById('reloadBtn');
+
+        let currentQuestion;
+        let answered = false;
+
+        function loadRandomQuestion() {
+            answered = false;
+            feedbackElement.style.display = 'none';
+            reloadBtn.style.display = 'none';
+            
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            currentQuestion = questions[randomIndex];
+            
+            questionElement.textContent = currentQuestion.question;
+            optionsElement.innerHTML = '';
+            
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.addEventListener('click', () => selectAnswer(index));
+                optionsElement.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedIndex) {
+            if (answered) return;
+            answered = true;
+            
+            const optionButtons = document.querySelectorAll('.option-btn');
+            optionButtons.forEach(button => {
+                button.disabled = true;
+            });
+            
+            if (selectedIndex === currentQuestion.correctAnswer) {
+                feedbackElement.textContent = "Acertou!!!";
+                feedbackElement.className = "feedback correct";
+            } else {
+                feedbackElement.textContent = `Resposta incorreta! A resposta correta é: ${currentQuestion.options[currentQuestion.correctAnswer]}`;
+                feedbackElement.className = "feedback incorrect";
+            }
+            
+            feedbackElement.style.display = 'block';
+            reloadBtn.style.display = 'block';
+        }
+
+        reloadBtn.addEventListener('click', () => {
+            location.reload();
+        });
+
+        loadRandomQuestion();
+    </script>
+</body>
+</html>
