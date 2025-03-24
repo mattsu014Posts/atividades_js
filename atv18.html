@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Carrinho de Compras</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .product, .cart {
+            width: 45%;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .product img {
+            max-width: 100%;
+            height: auto;
+        }
+        .product button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .product button:hover {
+            background-color: #218838;
+        }
+        .cart-summary {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .cart-summary p {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Loja Online</h1>
+</header>
+
+<div class="container">
+    <div class="product">
+        <h2>Catálogo de Produtos</h2>
+        <div id="product-list"></div>
+    </div>
+
+    <div class="cart">
+        <h2>Carrinho de Compras</h2>
+        <div id="cart-list"></div>
+        <div class="cart-summary">
+            <p>Total: R$ <span id="cart-total">0.00</span></p>
+            <button id="checkout">Finalizar Compra</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const apiURL = 'https://fakestoreapi.com/products';
+    let cart = [];
+
+    fetch(apiURL)
+        .then(response => response.json())
+        .then(data => {
+            displayProducts(data);
+        })
+        .catch(error => console.error('Error fetching products:', error));
+
+    function displayProducts(products) {
+        const productList = document.getElementById('product-list');
+        products.forEach(product => {
+            const productDiv = document.createElement('div');
+            productDiv.classList.add('product-item');
+            productDiv.innerHTML = `
+                <img src="${product.image}" alt="${product.title}">
+                <h3>${product.title}</h3>
+                <p>${product.description}</p>
+                <p>R$ ${product.price}</p>
+                <button onclick="addToCart(${product.id}, '${product.title}', ${product.price})">Adicionar ao Carrinho</button>
+            `;
+            productList.appendChild(productDiv);
+        });
+    }
+
+    function addToCart(id, title, price) {
+        const existingItem = cart.find(item => item.id === id);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({ id, title, price, quantity: 1 });
+        }
+        updateCart();
+    }
+
+    function updateCart() {
+        const cartList = document.getElementById('cart-list');
+        cartList.innerHTML = '';
+        let total = 0;
+
+        cart.forEach(item => {
+            const cartItem = document.createElement('div');
+            cartItem.innerHTML = `
+                <p>${item.title} - R$ ${item.price} x ${item.quantity}</p>
+            `;
+            cartList.appendChild(cartItem);
+            total += item.price * item.quantity;
+        });
+
+        document.getElementById('cart-total').innerText = total.toFixed(2);
+    }
+
+    document.getElementById('checkout').addEventListener('click', () => {
+        alert('Pedido finalizado!');
+        cart = [];
+        updateCart();
+    });
+</script>
+
+</body>
+</html>
