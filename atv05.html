@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Tarefas Domésticas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4a6fa5;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            flex: 1;
+        }
+        button {
+            background-color: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3a5a80;
+        }
+        .task-list {
+            margin-top: 30px;
+        }
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+        }
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .task-info {
+            flex: 1;
+        }
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .task-actions button {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        .priority-high {
+            border-left: 4px solid #e74c3c;
+        }
+        .priority-medium {
+            border-left: 4px solid #f39c12;
+        }
+        .priority-low {
+            border-left: 4px solid #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciador de Tarefas Domésticas</h1>
+        
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Digite uma nova tarefa...">
+            <select id="memberSelect">
+                <option value="Família">Família</option>
+                <option value="Pai">Pai</option>
+                <option value="Mãe">Mãe</option>
+                <option value="Filho(a)">Filho(a)</option>
+            </select>
+            <select id="prioritySelect">
+                <option value="low">Baixa</option>
+                <option value="medium">Média</option>
+                <option value="high">Alta</option>
+            </select>
+            <button onclick="addTask()">Adicionar</button>
+        </div>
+        
+        <div class="task-list" id="taskList">
+        </div>
+    </div>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('familyTasks')) || [];
+        
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            
+            tasks.forEach((task, index) => {
+                const taskItem = document.createElement('div');
+                taskItem.className = `task-item priority-${task.priority} ${task.completed ? 'completed' : ''}`;
+                
+                taskItem.innerHTML = `
+                    <div class="task-info">
+                        <strong>${task.name}</strong> - 
+                        Responsável: ${task.member} - 
+                        Prioridade: ${getPriorityText(task.priority)}
+                    </div>
+                    <div class="task-actions">
+                        <button onclick="toggleComplete(${index})">${task.completed ? 'Desfazer' : 'Concluir'}</button>
+                        <button onclick="editTask(${index})">Editar</button>
+                        <button onclick="deleteTask(${index})">Excluir</button>
+                    </div>
+                `;
+                
+                taskList.appendChild(taskItem);
+            });
+        }
+        
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const memberSelect = document.getElementById('memberSelect');
+            const prioritySelect = document.getElementById('prioritySelect');
+            
+            if (taskInput.value.trim() === '') {
+                alert('Por favor, digite uma tarefa!');
+                return;
+            }
+            
+            tasks.push({
+                name: taskInput.value.trim(),
+                member: memberSelect.value,
+                priority: prioritySelect.value,
+                completed: false,
+                createdAt: new Date().toISOString()
+            });
+            
+            saveTasks();
+            taskInput.value = '';
+            renderTasks();
+        }
+        
+        function deleteTask(index) {
+            if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+                tasks.splice(index, 1);
+                saveTasks();
+                renderTasks();
+            }
+        }
+        
+        function toggleComplete(index) {
+            tasks[index].completed = !tasks[index].completed;
+            saveTasks();
+            renderTasks();
+        }
+        
+        function editTask(index) {
+            const newName = prompt('Editar tarefa:', tasks[index].name);
+            if (newName !== null && newName.trim() !== '') {
+                tasks[index].name = newName.trim();
+                saveTasks();
+                renderTasks();
+            }
+        }
+        
+        function saveTasks() {
+            localStorage.setItem('familyTasks', JSON.stringify(tasks));
+        }
+        
+        function getPriorityText(priority) {
+            switch(priority) {
+                case 'high': return 'Alta';
+                case 'medium': return 'Média';
+                case 'low': return 'Baixa';
+                default: return '';
+            }
+        }
+        
+        renderTasks();
+    </script>
+</body>
+</html>
